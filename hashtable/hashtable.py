@@ -54,17 +54,17 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-        seed = 0
-        FNV_prime = 1099511628211
-        offset_basis = 14695981039346656037
+        # seed = 0
+        # FNV_prime = 1099511628211
+        # offset_basis = 14695981039346656037
 
         # Your code here
 
-        hash = offset_basis + seed
-        for char in key:
-            hash = hash * FNV_prime
-            hash = hash ^ ord(char)
-        return hash
+        # hash = offset_basis + seed
+        # for char in key:
+        #     hash = hash * FNV_prime
+        #     hash = hash ^ ord(char)
+        # return hash
        
 
 
@@ -76,8 +76,8 @@ class HashTable:
         """
         # Your code here
         hash = 5381
-        for _ in key:
-            hash = ((hash << 5) + hash) + ord(key)
+        for x in key:
+            hash = ((hash << 5) + hash) + ord(x)
         return hash & 0xFFFFFFFF
 
     def hash_index(self, key):
@@ -87,8 +87,8 @@ class HashTable:
         """
         # return self.fnv1(key) % self.capacity
         # return self.djb2(key) % self.capacity
-        return self.fnv1(key) % self.capacity
-        # return self.djb2(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
+        return self.djb2(key) % len(self.capacity)
         # return self.fnv1(key) & self.get_num_slots()
 
     def put(self, key, value):
@@ -100,9 +100,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        slot = self.hash_index(key)
-        entry = HashTableEntry(key, value)
-        self.capacity[slot] = entry
+        self.capacity[self.hash_index(key)] = value
 
 
     def delete(self, key):
@@ -114,7 +112,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.put(key, None)
+        self.capacity[self.hash_index(key)] = None
 
 
     def get(self, key):
@@ -126,12 +124,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        slot = self.hash_index(key)
-        entry = self.capacity[slot]
+        return self.capacity[self.hash_index(key)]
+        # slot = self.hash_index(key)
+        # entry = self.capacity[slot]
         
-        if entry:
-            return entry.value
-        return None
+        # if entry:
+        #     return entry.value
+        # return None
 
 
     def resize(self, new_capacity):
