@@ -11,6 +11,9 @@ class HashTableEntry:
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
+class LinkedList:
+    def __init__(self):
+        self.head = None
 
 class HashTable:
     """
@@ -22,7 +25,10 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-        self.capacity = [None] * MIN_CAPACITY
+        self.capacity = capacity
+        self.storage = [LinkedList()] * capacity
+        self.elements = 0
+        # self.capacity = [None] * MIN_CAPACITY
 
 
     def get_num_slots(self):
@@ -36,7 +42,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.capacity)
+        return len(self.storage)
 
 
     def get_load_factor(self):
@@ -46,6 +52,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.elements / self.get_num_slots()
 
 
     def fnv1(self, key):
@@ -54,17 +61,17 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-        # seed = 0
-        # FNV_prime = 1099511628211
-        # offset_basis = 14695981039346656037
+        seed = 0
+        FNV_prime = 1099511628211
+        offset_basis = 14695981039346656037
 
         # Your code here
 
-        # hash = offset_basis + seed
-        # for char in key:
-        #     hash = hash * FNV_prime
-        #     hash = hash ^ ord(char)
-        # return hash
+        hash = offset_basis + seed
+        for char in key:
+            hash = hash * FNV_prime
+            hash = hash ^ ord(char)
+        return hash
        
 
 
@@ -87,8 +94,8 @@ class HashTable:
         """
         # return self.fnv1(key) % self.capacity
         # return self.djb2(key) % self.capacity
-        # return self.fnv1(key) % self.capacity
-        return self.djb2(key) % len(self.capacity)
+        return self.fnv1(key) % self.capacity
+        # return self.djb2(key) % len(self.capacity)
         # return self.fnv1(key) & self.get_num_slots()
 
     def put(self, key, value):
@@ -100,8 +107,24 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.capacity[self.hash_index(key)] = value
-
+        # self.capacity[self.hash_index(key)] = value
+        index = self.hash_index(key)
+        
+        if self.storage[index].head == None:
+            self.storage[index].head = HashTableEntry(key, value)
+            self.elements += 1
+            return
+        else:
+            cur = self.storage[index].head
+            while cur.next:
+                if cur.key == key:
+                    cur.value = value
+                cur = cur.next
+            # if list doesn't have a key, add a new node
+            cur.next = HashTableEntry(key, value)
+            self.elements += 1
+            
+                
 
     def delete(self, key):
         """
@@ -112,7 +135,22 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        self.capacity[self.hash_index(key)] = None
+        # self.capacity[self.hash_index(key)] = None
+        index = self.hash_index(key)
+        cur = self.storage[index].head
+        
+        if cur.key == key:
+            self.storage[index].head = self.storage[index].head.next
+            self.elements -= 1
+            return
+        
+        while cur.next:
+            prev = cur
+            cur = cur.next
+            if cur.key == key:
+                prev.next = cur.next
+                self.elements -= 1
+                return None
 
 
     def get(self, key):
@@ -124,13 +162,21 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return self.capacity[self.hash_index(key)]
-        # slot = self.hash_index(key)
-        # entry = self.capacity[slot]
+        # return self.capacity[self.hash_index(key)]
+
+        index = self.hash_index(key)
+        cur = self.storage[index].head
         
-        # if entry:
-        #     return entry.value
-        # return None
+        if cur == None:
+            return None
+        if cur.key == key:
+            return cur.value
+        
+        while cur.next:
+            cur = cur.next
+            if cur.key == key:
+                return cur.value
+        return None
 
 
     def resize(self, new_capacity):
