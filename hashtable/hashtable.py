@@ -187,8 +187,23 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.capacity = new_capacity
+        new_array = [LinkedList()] * new_capacity
+        
+        for slot in self.storage:
+            cur = slot.head
+            
+            while cur:
+                index = self.hash_index(cur.key)
 
-
+                if new_array[index].head == None:
+                    new_array[index].head = HashTableEntry(cur.key, cur.value)
+                else:
+                    node = HashTableEntry(cur.key, cur.value)
+                    node.next = new_array[index].head
+                    new_array[index].head = node
+                cur = cur.next
+            self.storage = new_array
 
 if __name__ == "__main__":
     ht = HashTable(8)
